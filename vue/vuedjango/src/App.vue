@@ -1,11 +1,11 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
+
   <List> </List>
 </template>
 
 <script>
 // import HelloWorld from './components/HelloWorld.vue'
-import List from './components/list'
+import List from './components/tables'
 
 export default {
   name: 'App',

@@ -1,20 +1,8 @@
 <template>
-  <div class="container">
-    <div v-for="e in elements" v-bind:key="e.id">
-      <b-card
-        :title="e.title"       
-        class="mb-2"
-      >
-        <b-card-text>
-          {{ e.description }}
-        </b-card-text>
-
-      
-      </b-card>
-    </div>
+  <div>
+    <b-table striped hover :items="elements"></b-table>
   </div>
 </template>
-
 
 <script>
 export default {
