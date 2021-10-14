@@ -1,0 +1,23 @@
+<p>
+        <a href="{% url 'login' %} ">
+                login
+        </a>
+
+        
+        {% if  user.userprofile%}
+         <img src="{{MEDIA_URL}}{{user.userprofile.avatar}} " alt="" srcset="" width="5%" height="10%">
+                
+        {% else %}
+        <h1>no hya imagen</h1>
+        {% endif %}
+                
+
+        <form action="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{form}}
+                <input type="submit" value="imagen">
+        </form>
+
+        {{user.username}}
+        {{user.is_authenticated}}
+</p>
