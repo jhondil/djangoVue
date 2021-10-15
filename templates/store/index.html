@@ -58,8 +58,8 @@
                
             </p>
             <a href=" {% url 'store:detalle' e.id %}">ver id</a>
-            <a href=" {% url 'store:detalle' e.url_clean %}">ver slug</a>
             <a href=" {% url 'store:detalle' e.id e.url_clean %}">ver id/slug</a>
+            <a href=" {% url 'store:detalle' e.url_clean %}">ver slug</a>
         </div>
     </div>
       
