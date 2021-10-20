@@ -1,4 +1,9 @@
 from django.db import models
+# from stdimage import StdImageField, JPEGField
+
+from django.dispatch import receiver
+
+import os
 
 # Create your models here.
 
@@ -28,3 +33,41 @@ class Element(models.Model):
     
     def __str__(self):
         return self.title
+
+
+class ElementeImages(models.Model):
+    element = models.ForeignKey(Element, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    cover= models.ImageField(upload_to='images/')
+
+
+    def __str__(self):
+        return self.title # TODO
+
+
+@receiver(models.signals.post_delete,sender=ElementeImages)
+def auto_delete_file_on_delete(sender,instance, **kwargs):
+    if instance.cover:
+        if os.path.isfile(instance.cover.path):
+            os.remove(instance.cover.path)
+
+
+@receiver(models.signals.pre_save,sender=ElementeImages)
+def auto_delete_file_on_delete(sender,instance, **kwargs):
+
+    if not instance.pk:
+        return False
+
+    try:
+
+        old_file = ElementeImages.objects.get(pk=instance.pk).cover
+
+    except ElementeImages.DoesNotExist:
+        return False
+
+    new_file = instance.cover
+
+    if not old_file == new_file:
+        if instance.cover:
+            if os.path.isfile(old_file.path):
+                os.remove(old_file.path)

@@ -10,9 +10,17 @@ class TypeAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'title')
     
-    
+class ElementImagesLines(admin.StackedInline):
+    model = ElementeImages
+    extra=3
 class ElementAdmin(admin.ModelAdmin):
+
     list_display = ('id', 'title')
+    inlines = [ElementImagesLines]
+
+
+
+
 
 admin.site.register(Type, TypeAdmin)
 admin.site.register(Category, CategoryAdmin)

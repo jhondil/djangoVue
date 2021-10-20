@@ -13,9 +13,16 @@ urlpatterns = [
     
     #paypal
 
-    # path('product/pay/paypal/<int:pk>', views.index, name='pay paypal'),
-    path('product/paypal/success', views.paypal_success, name='paypal_success'),
+    path('product/pay/paypal/<int:pk>', views.make_pay_paypal, name='make_pay_paypal'),
+    path('product/paypal/success/<int:pk>', views.paypal_success, name='paypal_success'),
     path('product/paypal/cancel', views.paypal_cancel, name='paypal_cancel'),
+
+
+    path('product/payed/detail/<int:pk>', views.datail_pay, name='datail_pay'),
+
+    path('bought/', views.bought, name='bought'),
+
+
 
 
 ]
