@@ -32,7 +32,7 @@ def index (request):
         elements =  elements.filter(category_id=category_id)
 
 
-    elements =  elements.filter(type=1)
+    elements =  elements.all()
     category =  Category.objects.all()
 
     paginator = Paginator(elements,5)
