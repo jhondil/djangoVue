@@ -9,6 +9,7 @@
             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
             integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
             crossorigin="anonymous">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!--Fontawesome CDN-->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
@@ -32,14 +33,90 @@
             <img src="/uploads/{{element.elementeimages_set.all.0.cover}} " alt="{{e.elementeimages_set.all.0.title}}"  width="30%" height="30%" >
             <div class="card-body">
             <h1>
-                {{element.title}}
+                {{element.title}} ||||| precio = {{element.price}} 
+
+
             </h1>
-            <p>
-                {{element.description}}
+                
+                {% if  cupon %}
+                {% include  'store/fragment/detail_cupon.html' %}
+                    
+                {% endif %}
+                    
+
+
+            {% with message.count as total_comments %}
+
+                <h6>
+                    {{total_comments}}  <i class="fas fa-comment "></i> comentario{{total_comments| pluralize}}
+                </h6>
+                <div>
+                    {{element.description}}
+                </div>
+
+            {% endwith %}
+
+                {% if cupon %}
+                <a href=" {% url 'store:make_pay_paypal' element.id cupon.code %}">compar por paypal</a>
+
+                {% else %}
                 <a href=" {% url 'store:make_pay_paypal' element.id %}">compar por paypal</a>
-            </p>
+
+                {% endif %}
+
+            <details>
+                <summary>¿Tienes un descuento? {% if msj_cupon %}
+                    <span>{{msj_cupon}}</span>
+                {% endif %}</summary>
+                
+                
+
+                <form id="cupon" action="{% url 'store:cuponApply' %} " method="POST">
+                    {% csrf_token %}
+
+                    {{cupon_form}}
+                    <button type="submit">agregar cupon</button>
+                </form>
+            </details>
         </div>
     </div>
+
+    <div>
+        
+        {% for m in message %}
+
+            <p>{{m.counter}}  por {{m.name}} {{m.created}}:
+               {{m.body}} 
+            </p>
+
+            {% empty %}
+            <p>Sin comentarios</p>
+            
+        {% endfor %}
+            
+    </div>
+
+    
+    
+    {% if user.is_authenticated  %}
+    <div>
+        <form action="" method="post">
+            {% csrf_token %}
+
+            {% if form.errors %}
+
+                <p>{{form.errors}}</p>
+
+            {% endif %}
+
+            {{message_form.as_p}}
+            <button type="submit">enviar</button>
+
+        </form>
+    </div>
+
+    {% endif %}
+        
 
 
 </body>

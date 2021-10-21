@@ -1,17 +1,26 @@
+from django.http.response import HttpResponseNotFound
 from django.shortcuts import reverse, render, redirect, get_object_or_404
+from django.views.generic import (DetailView)
+from django.contrib.auth.decorators  import login_required
+from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.utils import timezone
+from django.http import HttpResponseNotFound
+
 
 from applications.Listelement.models import Element,Category
 from django.core.paginator import Paginator
-from django.views.generic import (DetailView)
 
-from django.contrib.auth.decorators  import login_required
+from .forms import *
+
 
 from paypalcheckoutsdk.core import PayPalHttpClient, SandboxEnvironment
 from paypalcheckoutsdk.orders import OrdersCreateRequest,OrdersCaptureRequest
 from paypalhttp import HttpError
 
-from .models import Payment
+from .models import *
+
+
 
 # Create your views here.
 
@@ -42,18 +51,104 @@ def index (request):
     return render(request,'store/index.html', {'elements': elements_page,'category': category,'search': search, 'category_id':category_id })
 
 
+def detail(request,url_clean,code=None):
+
+    # print(code)
+    # if code == None:
+    #     print(code)
+
+    cupon = get_valid_cupon(code) if code else None
+    msj_cupon = ''
+    if (code == 'None' or cupon is None) and code is not None :
+        msj_cupon = 'Cupón invalido'
+        code = ''
+
+
+    element = get_object_or_404(Element, url_clean = url_clean)
+    #mensajes que tienen configudos los elementos
+    message= element.element_cooments.filter(activate=True)
+    message_form= MessageForm()
+    cupon_form= CuponForm(initial={'element_id':element.id,'code':code })
+
+    message_new=None
+
+    if request.method == 'POST': #recibiendo el formulario
+        message_form =MessageForm(data=request.POST)
+        if message_form.is_valid():
+            message_new =message_form.save(commit=False)
+            message_new.element = element
+            #comentario por usuario
+            # if request.user.is_authenticated:
+            message_new.save()
+            message_form= MessageForm() #para cuando guarde boore lo que hay en el form(data)
+
+    return render(request,'store/detalleElement.html',{'element':element,
+                                                        'message_form':message_form,
+                                                        'message_new':message_new,
+                                                        'message':message,
+                                                        'cupon_form':cupon_form,
+                                                        'cupon':cupon,
+                                                        'msj_cupon':msj_cupon
+    })
+
+
+@require_POST  #para que sea accedida solo mediante post
+def cuponApply(request):
+    
+    form = CuponForm(request.POST)
+    cupon=None
+    
+    if form.is_valid():
+        code = form.cleaned_data['code']
+        elementId = form.cleaned_data['element_id']
+
+    #si el cupon es valido
+
+    try:
+        cuponModel = get_valid_cupon(code)
+
+        if cuponModel:
+            cupon = cuponModel.code
+
+    except Cupon.DoesNotExist:
+        pass
+
+    #si el elemento es valido
+    try:
+        element = Element.objects.get(id=elementId) 
+    except Element.DoesNotExist:
+        cupon=None
+
+    return redirect('store:detalle',url_clean=element.url_clean, code=cupon)
+
+
 class DetailsElement(DetailView):
     model = Element
     template_name='store/detalleElement.html'
     slug_field = 'url_clean'
     slug_url_kward = 'url_clean'
-    
-    
-@login_required    
-def make_pay_paypal(request,pk):
+
+
+@login_required
+def make_pay_paypal(request,pk, code=None):
+    #validar el cupon
+    cupon = get_valid_cupon(code) if code else None
+
+    #cupon invalido
+
+    if cupon is None and code is not None:
+        #aca se puede redirigir a una pagina de 404
+        return HttpResponseNotFound()
+
     element= get_object_or_404(Element, pk = pk)
-    
-    
+
+    if cupon: 
+        return_url =  f"http://127.0.0.1:8000/product/paypal/success/{element.id}/{cupon.code}"
+        # return_url =  "http://127.0.0.1:8000/product/paypal/success/%s/%s"%(element.id,cupon.code)
+        price= round(element.get_price_after_discount(cupon),2)
+    else:
+        return_url =  "http://127.0.0.1:8000/product/paypal/success/%s"%element.id,
+        price= element.price  
     
     # Creating Access Token for Sandbox
     client_id = settings.PAYPAL_CLIENT_ID
@@ -74,12 +169,12 @@ def make_pay_paypal(request,pk):
                 {
                     "amount": {
                         "currency_code": "USD",
-                        "value": str(element.price),
+                        "value": str(price),
                     }
                 }
             ],
             "application_context":{
-                "return_url": "http://127.0.0.1:8000/product/paypal/success/%s"%element.id,
+                "return_url": return_url,
                 "cancel_url": "http://127.0.0.1:8000/produt/paypal/cancel"
             }
         }
@@ -102,8 +197,12 @@ def make_pay_paypal(request,pk):
             print (ioe.status_code)
 
 
-@login_required   
-def paypal_success(request, pk):
+@login_required
+def paypal_success(request, pk, code=None):
+
+    cupon = get_valid_cupon(code) if code else None
+
+
     # Creating Access Token for Sandbox
     client_id = settings.PAYPAL_CLIENT_ID
     client_secret = settings.PAYPAL_CLIENT_SECRET
@@ -129,6 +228,14 @@ def paypal_success(request, pk):
             element_id=element.id,
             user_id=request.user.id
         )
+
+        if cupon:
+            paymentModel.cupon= cupon
+            paymentModel.discount = element.get_price_after_discount(cupon)
+            paymentModel.price_discount= element.get_discount(cupon)
+            cupon.active=0
+            cupon.save()
+
         paymentModel.save()
 
         return redirect(reverse('store:datail_pay', args=[paymentModel.id]))
@@ -148,16 +255,38 @@ def paypal_success(request, pk):
     return render(request, 'store/paypal/success.html')
 
 
-@login_required   
+@login_required
 def datail_pay(request, pk):
     payment= get_object_or_404(Payment, pk=pk)
     return render(request, 'store/payment/detail-payed.html', {'payment': payment})
 
 
-@login_required   
+@login_required
 def bought(request):
     return render(request, 'store/payment/bought.html', {'payments': Payment.objects.select_related('element').filter(user=request.user)})
 
-@login_required   
+
+@login_required
 def paypal_cancel(request):
+
     return render(request, 'store/paypal/cancel.html')
+
+
+def get_valid_cupon(code):
+    now = timezone.now()
+
+    cupon= None
+    try:
+
+        cuponModel = Cupon.objects.get(code__iexact=code, #iexact que sea exacto el valor 
+                valid_from__lte=now, #less than or equal to = menor igual a= la fecha  es igual o menor a la fecha del cupon
+                valid_to__gte=now, #great than or equal to = mayyor igual a= la fecha  es igual o mayor a la fecha del cupon
+                active=True
+        ) 
+
+        cupon=cuponModel
+
+    except Cupon.DoesNotExist:
+        pass
+
+    return cupon

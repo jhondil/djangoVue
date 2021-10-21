@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 # from stdimage import StdImageField, JPEGField
 
 from django.dispatch import receiver
@@ -30,6 +31,13 @@ class Element(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     #para activar cierto campo
     type = models.ForeignKey(Type, on_delete=models.CASCADE)
+
+    def get_discount(self,cupon):
+        return (cupon.discount / Decimal(100))* self.price  #  10/100 = 0.1* 10= 1
+
+    def get_price_after_discount(self,cupon):
+        return self.price - self.get_discount(cupon)
+
     
     def __str__(self):
         return self.title

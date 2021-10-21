@@ -1,0 +1,6 @@
+{% load  storetags%}
+
+<p>
+    precio Total <strong>{{element.price}}</strong> con descuento  <strong>${{element|discount:cupon|floatformat:2}}</strong>
+</p>
+
