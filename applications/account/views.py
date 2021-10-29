@@ -16,8 +16,9 @@ from .models import *
 def user_data(request):
 
     form=UserProfileForm()
+    
     if request.method == 'POST':
-
+        pathOldAvatar = None
         try:
             Userprofile = UserProfile.objects.get(user=request.user)
             form = UserProfileForm(request.POST, request.FILES, instance=Userprofile)

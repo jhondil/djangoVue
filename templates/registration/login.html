@@ -121,9 +121,13 @@
                 <div class="card-header">
                     <h3>Sign In</h3>
                     <div class="d-flex justify-content-end social_icon">
-                        <span><i class="fab fa-facebook-square"></i></span>
-                        <span><i class="fab fa-google-plus-square"></i></span>
-                        <span><i class="fab fa-twitter-square"></i></span>
+                        <!-- <span><i class="fab fa-facebook-square"></i></span> -->
+                        <a href="{% url 'social:begin' 'google-oauth2' %}"><span><i class="fab fa-google-plus-square"></i></span></a>
+                        <a href="{% url 'social:begin' 'facebook' %}"><span><i class="fab fa-facebook"></i></span></a>
+                        <!-- <a href="{% url 'social:begin' 'live' %}"><span><i class="fab fa-google-plus-square"></i></span></a>
+                        <a href="{% url 'social:begin' 'azuread-oauth2' %}"><span><i class="fab fa-google-plus-square"></i></span></a>
+                        <a href="{% url 'social:begin' 'azuread-tenant-oauth2' %}"><span><i class="fab fa-google-plus-square"></i></span></a> -->
+                        <!-- <span><i class="fab fa-twitter-square"></i></span> -->
                     </div>
                 </div>
 
@@ -168,10 +172,14 @@
                     <div class="d-flex justify-content-center">
                         <a href="{% url 'password_reset' %}">olvido su contraseña</a>
                     </div>
+                    
                 </div>
             </div>
         </div>
     </div>
 </body>
+
+
+
 
 </html>

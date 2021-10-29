@@ -24,4 +24,12 @@ urlpatterns = [
     path('accounts/', include('applications.account.urls')),
     path('', include('applications.store.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('social-auth/', include('social_django.urls', namespace='social')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# https://testdjango.com:8000/social-auth/complete/google-oauth2/
+# https://testdjango.com:8000/social-auth/complete/facebook/
+# https://testdjango.com:8000/social-auth/complete/live/
+# https://testdjango.com:8000/social-auth/complete/azuread-oauth2/
+# https://testdjango.com:8000/social-auth/complete/azuread-tenant-oauth2/
+

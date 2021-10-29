@@ -25,7 +25,10 @@ SECRET_KEY = 'django-insecure-ey)cs7#xu@iaa2_itxtb8izc(9p9gcrf&)#1$qqyz(2^+2r94x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [    
+    'testdjango.com' ,'localhost', '127.0.0.1'
+    ]
+
 
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -53,6 +56,8 @@ INSTALLED_APPS = [
     'applications.store',
     'rest_framework',
     'corsheaders',
+    'django_extensions',
+    'social_django',
     
 
 ]
@@ -68,6 +73,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'djangoVue.urls'
@@ -124,6 +130,39 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',    
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.twitter.TwitterOAuth',
+    'social_core.backends.facebook.FacebookOAuth2',
+    # 'social_core.backends.live.LiveOAuth2',
+    # 'social_core.backends.azuread.AzureADOAuth2',
+    # 'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
+    # 'social_core.backends.microsoft.MicrosoftOAuth2',
+    
+    # 'social_core.backends.twitter.TwitterOAuth',
+    # 'social_core.backends.facebook.FacebookOAuth2',
+]
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '961755421675-rc9nivacvgkavvkmn33i510gsp4faj37.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+
+SOCIAL_AUTH_FACEBOOK_KEY = '896282701021374'
+SOCIAL_AUTH_FACEBOOK_SECRET = 'b95a05b334efdf9c47732a98d99d4f43'
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+
+# SOCIAL_AUTH_LIVE_KEY = '95c71827-cf35-4117-99be-35f810edd5ae'
+# SOCIAL_AUTH_LIVE_SECRET = '69830509-6606-4f43-a71c-f992a1567682'
+
+# SOCIAL_AUTH_AZUREAD_OAUTH2_KEY = '95c71827-cf35-4117-99be-35f810edd5ae'
+# SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET = '69830509-6606-4f43-a71c-f992a1567682'
+
+# SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = 'f098a7e5-2caf-4bbe-bd4e-00fef7b6673e'
+# SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = '2a1ec2ca-86ec-4caf-a9ec-be79786f6c78'
+# SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = '2a1ec2ca-86ec-4caf-a9ec-be79786f6c78'
+
+
 
 
 # Internationalization

@@ -138,16 +138,17 @@ def make_pay_paypal(request,pk, code=None):
 
     if cupon is None and code is not None:
         #aca se puede redirigir a una pagina de 404
+        print('entro acá')
         return HttpResponseNotFound()
 
     element= get_object_or_404(Element, pk = pk)
 
     if cupon: 
-        return_url =  f"http://127.0.0.1:8000/product/paypal/success/{element.id}/{cupon.code}"
+        return_url =  f"https://testdjango.com:8000/product/paypal/success/{element.id}/{cupon.code}"
         # return_url =  "http://127.0.0.1:8000/product/paypal/success/%s/%s"%(element.id,cupon.code)
         price= round(element.get_price_after_discount(cupon),2)
     else:
-        return_url =  "http://127.0.0.1:8000/product/paypal/success/%s"%element.id,
+        return_url =  f"https://testdjango.com:8000/product/paypal/success/{element.id}"
         price= element.price  
     
     # Creating Access Token for Sandbox
